@@ -41,27 +41,60 @@ function initNavbarScroll() {
 function initMobileMenu() {
   if (!navToggle || !navMenu) return;
 
-  navToggle.addEventListener('click', () => {
-    navMenu.classList.toggle('active');
+  const toggleIcon = navToggle.querySelector('i');
+
+  const openMenu = () => {
+    navMenu.classList.add('active');
+    navToggle.setAttribute('aria-expanded', 'true');
+    if (toggleIcon) {
+      toggleIcon.className = 'fa-solid fa-xmark';
+    }
+  };
+
+  const closeMenu = () => {
+    navMenu.classList.remove('active');
+    navToggle.setAttribute('aria-expanded', 'false');
+    if (toggleIcon) {
+      toggleIcon.className = 'fa-solid fa-bars-staggered';
+    }
+  };
+
+  navToggle.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     const isOpen = navMenu.classList.contains('active');
-    navToggle.innerHTML = isOpen 
-      ? '<i class="fa-solid fa-xmark"></i>' 
-      : '<i class="fa-solid fa-bars-staggered"></i>';
+    if (isOpen) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  });
+
+  // Evitar que clicks dentro del contenedor del menú cierren prematuramente
+  navMenu.addEventListener('click', (e) => {
+    e.stopPropagation();
   });
 
   // Cerrar al hacer click en cualquier link
   navLinks.forEach(link => {
     link.addEventListener('click', () => {
-      navMenu.classList.remove('active');
-      navToggle.innerHTML = '<i class="fa-solid fa-bars-staggered"></i>';
+      closeMenu();
     });
   });
 
   // Cerrar al hacer click fuera del menú
   document.addEventListener('click', (e) => {
-    if (!navMenu.contains(e.target) && !navToggle.contains(e.target) && navMenu.classList.contains('active')) {
-      navMenu.classList.remove('active');
-      navToggle.innerHTML = '<i class="fa-solid fa-bars-staggered"></i>';
+    if (navMenu.classList.contains('active')) {
+      if (!navMenu.contains(e.target) && !navToggle.contains(e.target)) {
+        closeMenu();
+      }
+    }
+  });
+
+  // Cerrar al presionar tecla Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+      closeMenu();
     }
   });
 }
